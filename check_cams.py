@@ -5,8 +5,8 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
-TWILLIO_SID = os.environ.get('TWILLIO_SID')
-TWILLIO_AUTH_TOKEN  = os.environ.get('TWILLIO_AUTH_TOKEN')
+TWILLIO_SID = os.environ.get('TWILLIO_SID', '')
+TWILLIO_AUTH_TOKEN  = os.environ.get('TWILLIO_AUTH_TOKEN', '')
 TO_NUMBER = os.environ.get('TO_NUMBER')
 FROM_NUMBER = os.environ.get('FROM_NUMBER')
 WHITE_THRESHOLD = 0.8
@@ -84,10 +84,11 @@ if messages:
     msg = '\n'.join(messages)
     print(msg)
 
-    client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
-    message = client.messages.create(
-        to=TO_NUMBER,
-        from_=FROM_NUMBER,
-        body=msg
-    )
+    if TWILLIO_SID and TWILLIO_AUTH_TOKEN:
+        client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=TO_NUMBER,
+            from_=FROM_NUMBER,
+            body=msg
+        )
 
