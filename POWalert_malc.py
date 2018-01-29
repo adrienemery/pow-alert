@@ -6,8 +6,6 @@ from dotenv import load_dotenv, find_dotenv
 from urllib.request import urlopen
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from time import sleep
 from datetime import datetime
 startTime = datetime.now()
 
@@ -15,8 +13,6 @@ CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
 
 load_dotenv(find_dotenv())
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")
 
 
 class Resort:
@@ -31,7 +27,6 @@ class Resort:
 
     def update(self):
         if self.name == CYPRESS:
-            print("Cypress Update")
             self.webcam_img = urlopen(self.webcam_url).read()
             page = requests.get(self.info_url)
             soup = BeautifulSoup(page.content, 'html.parser')
@@ -43,20 +38,8 @@ class Resort:
                     self._24hsnow = el.text
 
         if self.name == WHISTLER:
-            print("Whistler Update")
-            # solution with Selenium
-            # options = webdriver.ChromeOptions()
-            # options.add_argument("--headless")
-            # browser = webdriver.Chrome(chrome_options=options)
-            # browser.get(self.info_url)
-            # sleep(4)
-            # self._12hsnow = browser.find_element_by_id('Last12Hours').text
-            # self._24hsnow = browser.find_element_by_id('Last24Hours').text
-            # browser.quit()
-
             # Solution with other url and No selenium
-            info_url = "https://www.pembertonvalleylodge.com/pemberton/snow-conditions/"
-            page = requests.get(info_url)
+            page = requests.get(self.info_url)
             soup = BeautifulSoup(page.content, 'html.parser')
             all_div = soup.find_all('div', id='conditions')
             for el in all_div:
@@ -83,8 +66,8 @@ Cypress = Resort(name=CYPRESS,
                  info_url="http://www.cypressmountain.com/downhill-conditions/")
 
 Whistler = Resort(name=WHISTLER,
-                  cam_url="http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768",
-                  info_url="https://www.whistlerblackcomb.com/mountain-info/snow-report")
+                  cam_url="",
+                  info_url="https://www.pembertonvalleylodge.com/pemberton/snow-conditions/")
 
 Cypress.info
 Whistler.info
