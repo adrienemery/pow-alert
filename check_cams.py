@@ -1,5 +1,14 @@
+import os
 from skimage import io
+from twilio.rest import Client
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
+
+TWILLIO_SID = os.environ.get('TWILLIO_SID')
+TWILLIO_AUTH_TOKEN  = os.environ.get('TWILLIO_AUTH_TOKEN')
+TO_NUMBER = os.environ.get('TO_NUMBER')
+FROM_NUMBER = os.environ.get('FROM_NUMBER')
 WHITE_THRESHOLD = 0.8
 
 cam_data = [
@@ -44,11 +53,11 @@ for data in cam_data:
     snow_stake_img = img[stake_roi[0][0]:stake_roi[0][1], stake_roi[1][0]:stake_roi[1][1]]
     img_height = snow_stake_img.shape[0]
 
-    # the dict below maps the height in centimeters marked on the snow stake
-    # to the pixel location where that mark is in the image
-
     snow_height = 0
+    # the cm_to_y_map below maps the height in centimeters marked on the snow stake
+    # to the pixel location where that mark is in the image
     cm_to_y_map = data['cm_to_y_map']
+
     for height_cm in sorted(cm_to_y_map.keys()):
         y_lower = img_height - cm_to_y_map[height_cm]
 
@@ -66,10 +75,19 @@ for data in cam_data:
 
     result[data['name']] = snow_height
 
-print(result)
+messages = []
 for name, snow_height in result.items():
     if snow_height:
-        # TODO send sms with twillio
-        print('It snowed {}cm overnight at {}!'.format(snow_height, name.title()))
-    else:
-        print('No snow at {} :('.format(name.title()))
+        messages.append('It snowed {}cm overnight at {}!'.format(snow_height, name.title()))
+
+if messages:
+    msg = '\n'.join(messages)
+    print(msg)
+
+    client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
+    message = client.messages.create(
+        to=TO_NUMBER,
+        from_=FROM_NUMBER,
+        body=msg
+    )
+
