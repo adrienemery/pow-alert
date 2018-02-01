@@ -13,8 +13,7 @@ FROM_NUMBER = os.environ.get('FROM_NUMBER')
 CAM_CONFIG = [
     {
         'name': 'Cypress',
-        # 'url': 'http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768',
-        'url': '/Users/adrienemery/Downloads/cypresscam.jpeg',
+        'url': 'http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768',
         'stake_roi': ((25, 600), (600, 700)),
         'white_threshold': 0.40,
         'cm_to_y_map': {
