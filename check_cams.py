@@ -5,6 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+DEBUG = os.environ.get('DEBUG', False)
 TWILLIO_SID = os.environ.get('TWILLIO_SID', '')
 TWILLIO_AUTH_TOKEN  = os.environ.get('TWILLIO_AUTH_TOKEN', '')
 TO_NUMBER = os.environ.get('TO_NUMBER')
@@ -12,13 +13,14 @@ FROM_NUMBER = os.environ.get('FROM_NUMBER')
 CAM_CONFIG = [
     {
         'name': 'Cypress',
-        'url': 'http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768',
+        # 'url': 'http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768',
+        'url': '/Users/adrienemery/Downloads/cypresscam.jpeg',
         'stake_roi': ((25, 600), (600, 700)),
-        'white_threshold': 0.6,
+        'white_threshold': 0.40,
         'cm_to_y_map': {
                 5: 10,
                 10: 60,
-                15: 107,
+                15: 105,
                 20: 158,
                 25: 213,
                 30: 273,
@@ -30,7 +32,7 @@ CAM_CONFIG = [
         'name': 'Whistler',
         'url': 'http://common.snow.com/mtncams/wbsnowstake.jpg',
         'stake_roi': ((200, 1200), (530, 700)),
-        'white_threshold': 0.7,
+        'white_threshold': 0.85,
         'cm_to_y_map': {
             5: 110,
             10: 155,
@@ -53,8 +55,11 @@ def get_roi(img, y_offset, height=10):
     return img[y_min:y_max, :]
 
 
-def img_has_snow(img, threshold):
+def img_has_snow(img, threshold, debug):
     avg_color = img.mean()
+
+    if DEBUG:
+        print(avg_color, threshold, debug)
 
     # if the mean value of the roi is greater than the threshold
     # then we can be fairly certain that it has snowed up to that point
@@ -66,6 +71,7 @@ def img_has_snow(img, threshold):
 def check_cam(cam_data):
     # fetch the most recent image from the web
     img = io.imread(cam_data['url'], as_grey=True)
+    io.imshow(img)
 
     # crop the image to only look at the snow stake
     stake_roi = cam_data['stake_roi']
@@ -78,31 +84,32 @@ def check_cam(cam_data):
     snow_height = 0  # cm
     for height_cm in sorted(cm_to_y_map.keys()):
         y_offset = cm_to_y_map[height_cm]
-        roi = get_roi(img, y_offset)
-        if img_has_snow(roi, cam_data['white_threshold']):
+        roi = get_roi(snow_stake_img, y_offset)
+        if img_has_snow(roi, cam_data['white_threshold'], debug=(cam_data['name'], height_cm)):
             snow_height = height_cm
 
     return snow_height
 
 
-result = {}
-for data in CAM_CONFIG:
-    result[data['name']] = check_cam(data)
+if __name__ == '__main__':
+    result = {}
+    for data in CAM_CONFIG:
+        result[data['name']] = check_cam(data)
 
-messages = []
-for name, snow_height in result.items():
-    if snow_height:
-        messages.append('It snowed {}cm overnight at {}!'.format(snow_height, name.title()))
+    messages = []
+    for name, snow_height in result.items():
+        if snow_height:
+            messages.append('It snowed {}cm overnight at {}!'.format(snow_height, name.title()))
 
-if messages:
-    msg = '\n'.join(messages)
-    print(msg)
+    if messages:
+        msg = '\n'.join(messages)
+        print(msg)
 
-    if TWILLIO_SID and TWILLIO_AUTH_TOKEN:
-        client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
-        message = client.messages.create(
-            to=TO_NUMBER,
-            from_=FROM_NUMBER,
-            body=msg
-        )
+        if TWILLIO_SID and TWILLIO_AUTH_TOKEN:
+            client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
+            message = client.messages.create(
+                to=TO_NUMBER,
+                from_=FROM_NUMBER,
+                body=msg
+            )
 
