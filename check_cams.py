@@ -70,7 +70,6 @@ def img_has_snow(img, threshold, debug):
 def check_cam(cam_data):
     # fetch the most recent image from the web
     img = io.imread(cam_data['url'], as_grey=True)
-    io.imshow(img)
 
     # crop the image to only look at the snow stake
     stake_roi = cam_data['stake_roi']
