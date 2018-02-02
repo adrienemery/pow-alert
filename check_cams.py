@@ -1,11 +1,26 @@
 import os
+import logging
+import json
 from skimage import io
 from twilio.rest import Client
 from dotenv import load_dotenv, find_dotenv
 
+LOGFILE = os.environ.get('LOGFILE', 'log.txt')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s %(asctime)s %(message)s",
+    filename=LOGFILE,
+)
+
+logger = logging.getLogger('__file__')
 load_dotenv(find_dotenv())
 
 DEBUG = os.environ.get('DEBUG', False)
+if DEBUG:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+
 TWILLIO_SID = os.environ.get('TWILLIO_SID', '')
 TWILLIO_AUTH_TOKEN  = os.environ.get('TWILLIO_AUTH_TOKEN', '')
 TO_NUMBER = os.environ.get('TO_NUMBER')
@@ -57,11 +72,9 @@ def get_roi(img, y_offset, height=10):
 def img_has_snow(img, threshold, debug):
     avg_color = img.mean()
 
-    if DEBUG:
-        print(avg_color, threshold, debug)
-
     # if the mean value of the roi is greater than the threshold
     # then we can be fairly certain that it has snowed up to that point
+    logger.info("mountain: {} avg: {:.3f} threshold: {}".format(debug[0], avg_color, debug[1]))
     if avg_color >= threshold:
         return True
     return False
@@ -100,8 +113,13 @@ if __name__ == '__main__':
             messages.append('It snowed {}cm overnight at {}!'.format(snow_height, name.title()))
 
     if messages:
+        logger.info('Sending SMS...')
+
+        for msg in messages:
+            logger.info(msg)
+            print(msg)
+
         msg = '\n'.join(messages)
-        print(msg)
 
         if TWILLIO_SID and TWILLIO_AUTH_TOKEN:
             client = Client(TWILLIO_SID, TWILLIO_AUTH_TOKEN)
