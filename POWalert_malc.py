@@ -1,23 +1,18 @@
 #! /usr/bin/env python
 
-import os
-from twilio.rest import Client
-from dotenv import load_dotenv, find_dotenv
 from urllib.request import urlopen
+from skimage import io
 import requests
 import re
 import json
 from bs4 import BeautifulSoup
+import send_text
+import parse_img
+import cv2
 
-load_dotenv(find_dotenv())
 
 CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
-TWILIO_ACCOUNT_SID = os.environ.get("TWILLIO_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILLIO_AUTH_TOKEN")
-MALCOLM_PHONE_NUMBER = os.environ.get("TO_NUMBER"),
-TWILIO_PHONE_NUMBER = os.environ.get("FROM_NUMBER")
-
 
 
 class Resort:
@@ -32,7 +27,11 @@ class Resort:
 
     def update(self):
         if self.webcam_url:
-            self.webcam_img = urlopen(self.webcam_url).read()
+            self.webcam_img = io.imread(self.webcam_url)#, as_grey=True)
+            cv2.imshow('image1', self.webcam_img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            parse_img.main(self.webcam_img)
 
         page = requests.get(self.info_url)
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -42,7 +41,7 @@ class Resort:
             for div in all_div:
                 if "24 hr Snow" in div.text:
                     el = div.find('span', class_='numbers')
-                    self._24hsnow = el.text
+                    self._24hsnow = el.text.split(' ')[0]
 
         if self.name == WHISTLER:
             text_json = re.search('FR.snowReportData = ({.*});', page.text)
@@ -65,20 +64,19 @@ class Resort:
                "******************\n"
 
 
-Cypress = Resort(name=CYPRESS,
-                 cam_url="http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768",
-                 info_url="http://www.cypressmountain.com/downhill-conditions/")
+Resort_list = {Resort(name=CYPRESS,
+                      cam_url="http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768",
+                      info_url="http://www.cypressmountain.com/downhill-conditions/"),
 
-Whistler = Resort(name=WHISTLER,
-                  info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx")
+               Resort(name=WHISTLER,
+                      info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx")
 
-text_message = Cypress.data + Whistler.data
+               }
+
+txt_message = ""
+for resort in Resort_list:
+    txt_message = txt_message + resort.data
+
+send_text.main(txt_message)
 
 
-# Send text message
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-
-client.api.account.messages.create(
-    to=MALCOLM_PHONE_NUMBER,
-    from_=TWILIO_PHONE_NUMBER,
-    body=text_message)
