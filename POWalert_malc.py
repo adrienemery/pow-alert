@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-from urllib.request import urlopen
 from skimage import io
 import requests
 import re
@@ -8,7 +7,6 @@ import json
 from bs4 import BeautifulSoup
 import send_text
 import parse_img
-import cv2
 
 
 CYPRESS = "Cypress"
@@ -27,11 +25,8 @@ class Resort:
 
     def update(self):
         if self.webcam_url:
-            self.webcam_img = io.imread(self.webcam_url)#, as_grey=True)
-            cv2.imshow('image1', self.webcam_img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            parse_img.main(self.webcam_img)
+            self.webcam_img = io.imread(self.webcam_url)
+            self._12hsnow = parse_img.main(self.webcam_img)
 
         page = requests.get(self.info_url)
         soup = BeautifulSoup(page.content, 'html.parser')
