@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import sys
 from skimage import io
 import requests
 import re
@@ -12,6 +13,7 @@ import parse_img
 CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
 
+PLOT_DEBUG = sys.argv[1]
 
 class Resort:
 
@@ -26,7 +28,7 @@ class Resort:
     def update(self):
         if self.webcam_url:
             self.webcam_img = io.imread(self.webcam_url)
-            self._12hsnow = parse_img.main(self.webcam_img)
+            self._12hsnow = parse_img.main(self.webcam_img, PLOT_DEBUG)
 
         page = requests.get(self.info_url)
         soup = BeautifulSoup(page.content, 'html.parser')

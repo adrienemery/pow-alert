@@ -27,7 +27,7 @@ def calcParams(point1, point2):  # line's equation Params computation
     return Params(a, b, c)
 
 
-def areLinesIntersecting(params1, params2, point1, point2):
+def areLinesIntersecting(params1, params2, point1, point2, img):
     det = params1.a * params2.b - params2.a * params1.b
     if det == 0:
         return False  # lines are parallel
@@ -35,20 +35,26 @@ def areLinesIntersecting(params1, params2, point1, point2):
         x = round(((params2.b * -params1.c - params1.b * -params2.c)/det), 12)  # floating imprecision
         y = round(((params1.a * -params2.c - params2.a * -params1.c)/det), 12)  # floating imprecision
         if x <= max(point1[0],point2[0]) and x >= min(point1[0],point2[0]) and y <= max(point1[1],point2[1]) and y >= min(point1[1],point2[1]):
+            if img.any():
+                cv2.circle(img, (int(x), int(y)), 10, (255, 255, 255), -1)  # intersecting point
             return int(x), int(y)  # lines are intersecting inside the line segment
         else:
             return  # lines are intersecting but outside of the line segment
 
 
-def main(image):
+def main(image, PLOT_DEBUG):
+
+    if PLOT_DEBUG:
+        from matplotlib import pyplot as plt
 
     with open(".env", 'r') as env:
         if "TOP_LEFT_OFFSET" not in env.read():  # calibration has not been done, calibration is done once in a lifetime
-            calibrate.main()
+            calibrate.main(PLOT_DEBUG)
         # else no need to calibrate > already done
 
     img = image
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # Otherwise the difference of encoding with cv2 and skimage will cause problems with matchTemplate
+    img2 = img.copy()
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Otherwise the difference of encoding with cv2 and skimage will cause problems with matchTemplate
     template1 = cv2.imread('templates/50.jpg', 0)
     template1 = cv2.resize(template1, (0, 0), fx=0.5, fy=0.5)  # MacOS grab.app changes resolution x2
     h1, w1 = template1.shape
@@ -66,6 +72,7 @@ def main(image):
     bottom_left_offset = eval(str(os.environ.get("BOTTOM_LEFT_OFFSET")))
     bottom_right_offset = eval(str(os.environ.get("BOTTOM_RIGHT_OFFSET")))
 
+
     # Get 4 corners of ROI
     roi_top_left = tuple(x + y for x, y in zip(top_left1, top_left_offset))
     roi_top_right = tuple(x + y for x, y in zip(top_left1, top_right_offset))
@@ -77,13 +84,28 @@ def main(image):
     # if we increase Y by thickness_scale, we get to the next threshold (5-10-15..50)
 
     # Since the template is not perfectly centered we need an offset to align the center of the template and the line
-    # with 9 here some kind of visual magic number as an correction offset :/
+    # with 9 here some kind of visual magic number as an correction offset (sorry)
     thickness_scale = int(abs(_50_mark_line - _0_mark_line) / 10) + 9
 
     # Get the function of the 2 vertical ROI limits
     roi_left_line = calcParams(roi_top_left, roi_bottom_left)
     roi_right_line = calcParams(roi_top_right, roi_bottom_right)
 
+    if PLOT_DEBUG:  # plots threshold lines
+        scale = thickness_scale
+        for i in range(0, 10):
+            if i > 4:  # black magic to counter difference of scale due to angle of camera
+                scale -= 1
+            if i > 7:
+                scale -= 0.5
+            cv2.line(img,
+                     (5, int(_50_mark_line + i * scale)),
+                     (1020, int(_50_mark_line + i * scale)),
+                     (255, 255, 255),
+                     5)
+        plt.subplot(111), plt.imshow(img, cmap='gray')
+        plt.title('Thresholds'), plt.xticks([]), plt.yticks([])
+        plt.show()
 
     # extract points on both side of ROI where thresholds are
     threshold_points_list = list()
@@ -93,10 +115,27 @@ def main(image):
             scale -= 1
         if i > 7:
             scale -= 0.5
+
         threshold_points = ((0, int(_50_mark_line + i * scale)), (w-1, int(_50_mark_line + i * scale)))
         threshold_line = calcParams((0, int(_50_mark_line + i * scale)), (w-1, int(_50_mark_line + i * scale)))
-        threshold_points_list.append(((areLinesIntersecting(roi_left_line, threshold_line, threshold_points[0], threshold_points[1])),
-                                      (areLinesIntersecting(roi_right_line, threshold_line, threshold_points[0], threshold_points[1]))))
+        threshold_points_list.append((areLinesIntersecting(roi_left_line,
+                                                           threshold_line,
+                                                           threshold_points[0],
+                                                           threshold_points[1],
+                                                           img if PLOT_DEBUG else None),
+                                      areLinesIntersecting(roi_right_line,
+                                                           threshold_line,
+                                                           threshold_points[0],
+                                                           threshold_points[1],
+                                                           img if PLOT_DEBUG else None)))
+
+    if PLOT_DEBUG:
+        plt.subplot(111), plt.imshow(img, cmap='gray')
+        plt.title('Thresholds ROI limits'), plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    if PLOT_DEBUG:
+        img3 = img2.copy()
 
     # Extract ROI around threshold
     local_roi = list()
@@ -106,6 +145,14 @@ def main(image):
             thick = abs(int((threshold_points_list[i][0][1] - threshold_points_list[i + 1][0][1]) / 2))
         local_roi.append(img[int(threshold_points_list[i][0][1] - thick):int(threshold_points_list[i][1][1] + thick),
                          threshold_points_list[i][0][0]:threshold_points_list[i][1][0]])
+        if PLOT_DEBUG:
+            cv2.rectangle(img3, (threshold_points_list[i][0][0], int(threshold_points_list[i][0][1] - thick)),
+                          (threshold_points_list[i][1][0], int(threshold_points_list[i][1][1] + thick)), 255, 3)
+    if PLOT_DEBUG:
+        plt.subplot(111), plt.imshow(img3, cmap='gray')
+        plt.title('ROI'), plt.xticks([]), plt.yticks([])
+        plt.show()
+
 
     # Average value of pixels in the ROI
     avg_pix_roi = list()
