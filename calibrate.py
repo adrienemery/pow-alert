@@ -14,7 +14,7 @@ methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR',
             'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
 
 
-def main(PLOT_DEBUG):
+def cypress_img(debug_option):
     # the following image will be used to calibrate the scale
     img = cv2.imread('templates/SnowStake_Cypress_night0.jpg', 0)
     img2 = img.copy()
@@ -25,7 +25,7 @@ def main(PLOT_DEBUG):
     h1, w1 = template1.shape
     h2, w2 = template2.shape
 
-    if PLOT_DEBUG:
+    if debug_option:
         # allows to pick which method works best
         for meth in methods:
             img = img2.copy()
@@ -62,7 +62,7 @@ def main(PLOT_DEBUG):
     bottom_right1 = (top_left1[0] + w1, top_left1[1] + h1)
     bottom_right2 = (top_left2[0] + w2, top_left2[1] + h2)
 
-    if PLOT_DEBUG:
+    if debug_option:
         roi_top_left = top_left1
         roi_top_right = (top_left1[0] + w1, top_left1[1])
         roi_bottom_right = bottom_right2
@@ -71,11 +71,12 @@ def main(PLOT_DEBUG):
         cv2.rectangle(img, top_left1, bottom_right1, 255, 2)
         cv2.rectangle(img, top_left2, bottom_right2, 255, 2)
 
-        points = [list(roi_top_left),
-                  list(roi_top_right),
-                  list(roi_bottom_right),
-                  list(roi_bottom_left)
-                  ]
+        points = [
+            list(roi_top_left),
+            list(roi_top_right),
+            list(roi_bottom_right),
+            list(roi_bottom_left)
+            ]
 
         # Now plot the ROI
         pts = np.array(points, np.int32)

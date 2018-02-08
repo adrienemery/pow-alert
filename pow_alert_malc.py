@@ -6,7 +6,7 @@ import requests
 import re
 import json
 from bs4 import BeautifulSoup
-import send_text
+import notifications
 import parse_img
 
 
@@ -14,6 +14,7 @@ CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
 
 PLOT_DEBUG = sys.argv[1]
+
 
 class Resort:
 
@@ -28,7 +29,9 @@ class Resort:
     def update(self):
         if self.webcam_url:
             self.webcam_img = io.imread(self.webcam_url)
-            self._12hsnow = parse_img.main(self.webcam_img, PLOT_DEBUG)
+            self._12hsnow = parse_img.read_height(image=self.webcam_img,
+                                                  debug_option=PLOT_DEBUG,
+                                                  resort=self.name)
 
         page = requests.get(self.info_url)
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -50,7 +53,7 @@ class Resort:
         print(self.name+" report:")
         print(self._12hsnow+" cm overnight")
         print(self._24hsnow + " cm last 24h")
-        print("*********")
+        print("******************")
 
     @property
     def data(self):
@@ -74,6 +77,6 @@ txt_message = ""
 for resort in Resort_list:
     txt_message = txt_message + resort.data
 
-send_text.main(txt_message)
+notifications.send_sms(txt_message)
 
 

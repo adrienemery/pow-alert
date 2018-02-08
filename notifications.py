@@ -13,7 +13,7 @@ TO_NUMBER = os.environ.get("TO_NUMBER")
 FROM_NUMBER = os.environ.get("FROM_NUMBER")
 
 
-def main(text):
+def send_sms(text):
     # Send text message
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
