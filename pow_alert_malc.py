@@ -13,7 +13,10 @@ import parse_img
 CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
 
-PLOT_DEBUG = sys.argv[1]
+try:
+    PLOT_DEBUG = sys.argv[1]
+except IndexError:
+    PLOT_DEBUG = False
 
 
 class Resort:
