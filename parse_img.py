@@ -8,7 +8,7 @@ import collections
 
 Params = collections.namedtuple('Params', ['a', 'b', 'c'])  # to store equation of a line
 NBR_OF_THRESHOLD = 10
-WHITE_THRESHOLD = 0.4 * 255
+WHITE_THRESHOLD = 0.5 * 255
 LIST_OF_THRESHOLDS = ('50', '45', '40', '35', '30', '25', '20', '15', '10', '5', '0')
 CYPRESS = "Cypress"
 WHISTLER = "Whistler - Blackomb"
