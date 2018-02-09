@@ -14,7 +14,7 @@ methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR',
             'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
 
 
-def cypress_img(debug_option):
+def cypress_img(debug_option=False):
     # the following image will be used to calibrate the scale
     img = cv2.imread('templates/SnowStake_Cypress_night0.jpg', 0)
     img2 = img.copy()

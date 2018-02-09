@@ -29,7 +29,7 @@ def calc_params(point1, point2):  # line's equation Params computation aX + bY +
     return Params(a, b, c)
 
 
-def lines_intersection_pt(params1, params2, point1, point2, img):
+def lines_intersection_pt(params1, params2, point1, point2, img, dbg):
     det = params1.a * params2.b - params2.a * params1.b
     if det == 0:
         return False  # lines are parallel
@@ -38,14 +38,14 @@ def lines_intersection_pt(params1, params2, point1, point2, img):
         y = round(((params1.a * -params2.c - params2.a * -params1.c)/det), 12)  # floating imprecision
         if min(point1[0], point2[0]) <= x <= max(point1[0], point2[0]) \
                 and min(point1[0], point2[0]) <= y <= max(point1[1], point2[1]):
-            if img.any():
+            if dbg:
                 cv2.circle(img, (int(x), int(y)), 10, (255, 255, 255), -1)  # intersecting point
             return int(x), int(y)  # lines are intersecting inside the line segment
         else:
             return  # lines are intersecting but outside of the line segment
 
 
-def read_height(image, debug_option, resort):
+def read_height(image, resort, debug_option=False):
 
     if debug_option:
         from matplotlib import pyplot as plt
@@ -96,7 +96,7 @@ def read_height(image, debug_option, resort):
 
         if debug_option:  # plots threshold lines
             scale = thickness_scale
-            for i in range(0, 10):
+            for i in range(NBR_OF_THRESHOLD):
                 if i > 4:  # black magic to counter difference of scale due to angle of camera
                     scale -= 1
                 if i > 7:
@@ -113,7 +113,7 @@ def read_height(image, debug_option, resort):
         # extract points on both side of ROI where thresholds are
         threshold_points_list = list()
         scale = thickness_scale
-        for i in range(0, NBR_OF_THRESHOLD):
+        for i in range(NBR_OF_THRESHOLD):
             if i > 4:  # black magic to counter the difference of scale due to angle of camera and may be also fish-eye
                 scale -= 1
             if i > 7:
@@ -121,16 +121,14 @@ def read_height(image, debug_option, resort):
 
             threshold_points = ((0, int(_50_mark_line + i * scale)), (w-1, int(_50_mark_line + i * scale)))
             threshold_line = calc_params((0, int(_50_mark_line + i * scale)), (w-1, int(_50_mark_line + i * scale)))
-            threshold_points_list.append((lines_intersection_pt(roi_left_line,
-                                                                threshold_line,
-                                                                threshold_points[0],
-                                                                threshold_points[1],
-                                                                img if debug_option else None),
-                                          lines_intersection_pt(roi_right_line,
-                                                                threshold_line,
-                                                                threshold_points[0],
-                                                                threshold_points[1],
-                                                                img if debug_option else None)))
+
+            img_dbg = img if debug_option else None
+            point_a = lines_intersection_pt(roi_left_line, threshold_line, threshold_points[0], threshold_points[1],
+                                            img_dbg, debug_option)
+            point_b = lines_intersection_pt(roi_right_line, threshold_line, threshold_points[0], threshold_points[1],
+                                            img_dbg, debug_option)
+
+            threshold_points_list.append((point_a, point_b))
 
         if debug_option:
             plt.subplot(111), plt.imshow(img, cmap='gray')
@@ -142,7 +140,7 @@ def read_height(image, debug_option, resort):
 
         # Extract ROI around threshold
         local_roi = list()
-        for i in range(0, NBR_OF_THRESHOLD):
+        for i in range(NBR_OF_THRESHOLD):
             # the ROI ends halfway between the current threshold and the next. two last ROIs are identical size
             if i < NBR_OF_THRESHOLD - 1:
                 thick = abs(int((threshold_points_list[i][0][1] - threshold_points_list[i + 1][0][1]) / 2))
@@ -160,9 +158,9 @@ def read_height(image, debug_option, resort):
         avg_pix_roi = [int(roi.mean()) for roi in local_roi[:NBR_OF_THRESHOLD]]
 
         # Now scale it for snow fall
-        for i in range(0, NBR_OF_THRESHOLD):
-            if avg_pix_roi[i] > WHITE_THRESHOLD:
-                return LIST_OF_THRESHOLDS[i]
+        for threshold_val, white_val in zip(LIST_OF_THRESHOLDS, avg_pix_roi):
+            if white_val > WHITE_THRESHOLD:
+                return threshold_val
 
         return LIST_OF_THRESHOLDS[-1]
 
