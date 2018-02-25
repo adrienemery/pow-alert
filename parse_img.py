@@ -4,14 +4,12 @@ import os
 import cv2
 import calibrate
 import collections
-
+from resort_names import *
 
 Params = collections.namedtuple('Params', ['a', 'b', 'c'])  # to store equation of a line
 NBR_OF_THRESHOLD = 10
 WHITE_THRESHOLD = 0.5 * 255
 LIST_OF_THRESHOLDS = ('50', '45', '40', '35', '30', '25', '20', '15', '10', '5', '0')
-CYPRESS = "Cypress"
-WHISTLER = "Whistler - Blackomb"
 
 
 def calc_params(point1, point2):  # line's equation Params computation aX + bY + c

@@ -8,10 +8,9 @@ import json
 from bs4 import BeautifulSoup
 import notifications
 import parse_img
+from resort_names import *
 
-
-CYPRESS = "Cypress"
-WHISTLER = "Whistler - Blackomb"
+resort_names = [CYPRESS, WHISTLER]
 
 try:
     PLOT_DEBUG = sys.argv[1]
@@ -65,16 +64,21 @@ class Resort:
                self._12hsnow + " cm overnight\n" + \
                self._24hsnow + " cm last 24h\n" + \
                "******************\n"
+        return {'name':self.name, '12':self._12hsnow, '24':self._24hsnow}
 
 
-Resort_list = {Resort(name=CYPRESS,
-                      cam_url="http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768",
-                      info_url="http://www.cypressmountain.com/downhill-conditions/"),
+resort_dict = {
+    CYPRESS: Resort(name=CYPRESS,
+                    cam_url="http://snowstakecam.cypressmountain.com/axis-cgi/jpg/image.cgi?resolution=1024x768",
+                    info_url="http://www.cypressmountain.com/downhill-conditions/"),
 
-               Resort(name=WHISTLER,
-                      info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx")
+    WHISTLER: Resort(name=WHISTLER,
+                     info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx")
+}
 
-               }
+
+
+
 
 txt_message = ""
 for resort in Resort_list:
