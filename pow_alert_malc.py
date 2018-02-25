@@ -34,36 +34,35 @@ class Resort:
             self._12hsnow = parse_img.read_height(image=self.webcam_img,
                                                   debug_option=PLOT_DEBUG,
                                                   resort=self.name)
-
         page = requests.get(self.info_url)
+        handler_fnc = getattr(self, f'update_{self.name}')
+        return handler_fnc(page)
+
+
+    def update_whistler(self, page):
+        text_json = re.search('FR.snowReportData = ({.*});', page.text)
+        data = json.loads(text_json.groups()[0])
+        self._24hsnow = data['TwentyFourHourSnowfall']['Centimeters']
+        self._12hsnow = data['OvernightSnowfall']['Centimeters']
+
+    def update_cypress(self, page):
         soup = BeautifulSoup(page.content, 'html.parser')
+        all_div = soup.find_all('div', class_='weather-item clearfix')
+        for div in all_div:
+            if "24 hr Snow" in div.text:
+                el = div.find('span', class_='numbers')
+                self._24hsnow = el.text.split(' ')[0]
 
-        if self.name == CYPRESS:
-            all_div = soup.find_all('div', class_='weather-item clearfix')
-            for div in all_div:
-                if "24 hr Snow" in div.text:
-                    el = div.find('span', class_='numbers')
-                    self._24hsnow = el.text.split(' ')[0]
 
-        if self.name == WHISTLER:
-            text_json = re.search('FR.snowReportData = ({.*});', page.text)
-            data = json.loads(text_json.groups()[0])
-            self._24hsnow = data['TwentyFourHourSnowfall']['Centimeters']
-            self._12hsnow = data['OvernightSnowfall']['Centimeters']
-
-    def discard_info(self):
-        print(self.name+" report:")
-        print(self._12hsnow+" cm overnight")
-        print(self._24hsnow + " cm last 24h")
+    def display_info(self):
+        print(f"{self.name.tittle()} report:")
+        print(f"{self._12hsnow} cm overnight")
+        print(f"{self._24hsnow} cm last 24h")
         print("******************")
 
     @property
     def data(self):
         self.update()
-        return self.name + " report:\n" + \
-               self._12hsnow + " cm overnight\n" + \
-               self._24hsnow + " cm last 24h\n" + \
-               "******************\n"
         return {'name':self.name, '12':self._12hsnow, '24':self._24hsnow}
 
 
