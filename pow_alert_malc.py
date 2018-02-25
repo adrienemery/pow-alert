@@ -76,13 +76,30 @@ resort_dict = {
 }
 
 
+def check_snow(resort_list_names=None):
+    names = resort_list_names or resort_dict.keys()
+    result = []
+    for name in names:
+        result.append(resort_dict[name].data)
+    return result
 
 
+def pretify_data(data):
+    txt = "**Snow Report**"
+    for resort in data:
+        txt = f"{txt} {resort['name'].title()}:\n" \
+              f"{resort['12']}cm last 12h\n" \
+              f"{resort['24']}cm last 12h\n" \
+              "******************"
+    return txt
 
-txt_message = ""
-for resort in Resort_list:
-    txt_message = txt_message + resort.data
+if __name__ == "__main__":
+    txt_message = ""
+    for resort in resort_dict.values():
+        txt_message = txt_message + resort.data
+        if resort.name == CYPRESS and int(resort._12hsnow) > 0:
+            io.imsave("test_Cypress.png", resort.webcam_img)
 
-notifications.send_sms(txt_message)
+    notifications.send_sms(txt_message)
 
 
