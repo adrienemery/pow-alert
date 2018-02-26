@@ -33,7 +33,6 @@ class Resort:
         handler_fnc = getattr(self, f'update_{self.name}')
         return handler_fnc(page)
 
-
     def update_whistler(self, page):
         text_json = re.search('FR.snowReportData = ({.*});', page.text)
         data = json.loads(text_json.groups()[0])
@@ -47,7 +46,6 @@ class Resort:
             if "24 hr Snow" in div.text:
                 el = div.find('span', class_='numbers')
                 self._24hsnow = el.text.split(' ')[0]
-
 
     def display_info(self):
         print(f"{self.name.tittle()} report:")
@@ -80,11 +78,11 @@ def check_snow(resort_list_names=None):
 
 
 def pretify_data(data):
-    txt = "**Snow Report**"
+    txt = "**Snow Report**\n"
     for resort in data:
         txt = f"{txt} {resort['name'].title()}:\n" \
               f"{resort['12']}cm last 12h\n" \
-              f"{resort['24']}cm last 12h\n" \
+              f"{resort['24']}cm last 24h\n" \
               "******************"
     return txt
 
