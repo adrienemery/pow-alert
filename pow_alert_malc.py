@@ -11,12 +11,7 @@ import parse_img
 from resort_names import *
 
 resort_names = [CYPRESS, WHISTLER]
-
-try:
-    PLOT_DEBUG = sys.argv[1]
-except IndexError:
-    PLOT_DEBUG = False
-
+PLOT_DEBUG = False
 
 class Resort:
 
@@ -93,7 +88,13 @@ def pretify_data(data):
               "******************"
     return txt
 
+
 if __name__ == "__main__":
+    try:
+        PLOT_DEBUG = sys.argv[1]
+    except IndexError:
+        PLOT_DEBUG = False
+
     txt_message = ""
     for resort in resort_dict.values():
         txt_message = txt_message + resort.data
