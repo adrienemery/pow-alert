@@ -23,6 +23,7 @@ def handler():
         update()
     else:
         notifications.send_sms("Sorry buddy")
+    return ''  # Flask needs a return str
 
 @app.route('/json')
 def index():
