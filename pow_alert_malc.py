@@ -95,7 +95,10 @@ if __name__ == "__main__":
 
     txt_message = ""
     for resort in resort_dict.values():
-        txt_message = txt_message + resort.data
+        txt_message = f"{txt_message} {resort.data['name'].title()}:\n" \
+                      f"{resort.data['12']}cm last 12h\n" \
+                      f"{resort.data['24']}cm last 24h\n" \
+                      "******************"
         if resort.name == CYPRESS and int(resort._12hsnow) > 0:
             io.imsave("test_Cypress.png", resort.webcam_img)
 
