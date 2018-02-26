@@ -13,12 +13,13 @@ TO_NUMBER = os.environ.get("TO_NUMBER")
 FROM_NUMBER = os.environ.get("FROM_NUMBER")
 
 
-def send_sms(text):
+def send_sms(text, to_num, from_num):
     # Send text message
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-    client.api.account.messages.create(
-        to=TO_NUMBER,
-        from_=FROM_NUMBER,
-        body=text)
+    for num in to_num:
+        client.api.account.messages.create(
+            to=num,
+            from_=from_num,
+            body=text)
 
