@@ -16,9 +16,8 @@ def send_sms(text, to_num):
     # Send text message
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-    for num in to_num:
-        client.api.account.messages.create(
-            to=num,
-            from_=TWILIO_NUMBER,
-            body=text)
+    client.api.account.messages.create(
+        to=to_num,
+        from_=TWILIO_NUMBER,
+        body=text)
 
