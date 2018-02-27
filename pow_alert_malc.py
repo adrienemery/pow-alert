@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import notifications
 import parse_img
 from resort_names import *
+import mySQLdatabase as sql
 
 resort_names = [CYPRESS, WHISTLER]
 PLOT_DEBUG = False
@@ -92,6 +93,8 @@ if __name__ == "__main__":
         PLOT_DEBUG = sys.argv[1]
     except IndexError:
         PLOT_DEBUG = False
+
+    registered_numbers = sql.query_registered_numbers()
 
     txt_message = ""
     for resort in resort_dict.values():
