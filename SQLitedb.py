@@ -11,12 +11,18 @@ UPDATE = "update"
 UNREGISTER = "unregister"
 REMOVE = "remove"
 
+connect = sqlite3.connect(DATABASE)
+curs = connect.cursor()
+curs.execute("""CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY, number VARCHAR(15), registered VARCHAR(3))""")
+connect.commit()  # Save (commit) the changes
+connect.close()
+
 
 def add(phone_number, register):
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
 
-    c.execute("""INSERT INTO Users VALUES (?,?)""", (phone_number, register))
+    c.execute("""INSERT INTO Users VALUES (NULL,?,?)""", (phone_number, register))
 
     conn.commit()  # Save (commit) the changes
     conn.close()
@@ -35,15 +41,13 @@ def remove(phone_number):
 def in_database(phone_number):
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
+    found = False
 
     for row in c.execute("""SELECT number FROM Users"""):
         if phone_number in row:
             found = True
-        else:
-            found = False
 
     conn.close()
-
     return found
 
 
