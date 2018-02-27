@@ -105,6 +105,6 @@ if __name__ == "__main__":
         if resort.name == CYPRESS and int(resort._12hsnow) > 0:
             io.imsave("test_Cypress.png", resort.webcam_img)
 
-    notifications.send_sms(txt_message)
+    notifications.send_sms(txt_message, registered_numbers)
 
 

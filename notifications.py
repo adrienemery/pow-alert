@@ -9,17 +9,16 @@ load_dotenv(find_dotenv())
 
 TWILIO_ACCOUNT_SID = os.environ.get("TWILLIO_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILLIO_AUTH_TOKEN")
-TO_NUMBER = os.environ.get("TO_NUMBER")
-FROM_NUMBER = os.environ.get("FROM_NUMBER")
+TWILIO_NUMBER = os.environ.get("TWILIO_NUMBER")
 
 
-def send_sms(text, to_num, from_num):
+def send_sms(text, to_num):
     # Send text message
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
     for num in to_num:
         client.api.account.messages.create(
             to=num,
-            from_=from_num,
+            from_=TWILIO_NUMBER,
             body=text)
 

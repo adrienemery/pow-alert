@@ -12,16 +12,15 @@ app = Flask(__name__)
 CORS(app)
 
 
-def update(to_num, twilio_num):
+def update(to_num):
     result = check_snow()
     txt_message = pretify_data(result)
-    notifications.send_sms(txt_message, to_num, twilio_num)
+    notifications.send_sms(txt_message, to_num)
 
 @app.route('/')
 def handler():
     msg = request.args['Body']
-    num = request.args['From']
-    twilio_num = request.args['To']
+    client_num = request.args['From']
     # when using notifications.send_sms() method, remember that From and To args received are reversed when message sent
 
     sql.update_database(client_num, msg.lower())
