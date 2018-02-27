@@ -94,6 +94,7 @@ if __name__ == "__main__":
     except IndexError:
         PLOT_DEBUG = False
 
+    fresh_snow = False
     registered_numbers = sql.query_registered_numbers()
 
     txt_message = ""
@@ -105,6 +106,11 @@ if __name__ == "__main__":
         if resort.name == CYPRESS and int(resort._12hsnow) > 0:
             io.imsave("test_Cypress.png", resort.webcam_img)
 
-    notifications.send_sms(txt_message, registered_numbers)
+        if int(resort._12hsnow) > 0:
+            fresh_snow = True
+
+    if fresh_snow:
+        for number in registered_numbers:
+            notifications.send_sms(txt_message, number)
 
 
