@@ -79,7 +79,7 @@ def check_snow(resort_list_names=None):
 
 
 def pretify_data(data):
-    txt = "**Snow Report**\n"
+    txt = "**Snow Report**"
     for resort in data:
         txt = f"{txt} \n{resort['name'].title()}:\n" \
               f"{resort['12']}cm last 12h\n" \
