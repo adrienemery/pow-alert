@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import notifications
 import parse_img
 from resort_names import *
-import mySQLdatabase as sql
+import SQLitedb as sql
 
 resort_names = [CYPRESS, WHISTLER]
 PLOT_DEBUG = False

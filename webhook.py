@@ -2,7 +2,7 @@
 
 
 from pow_alert_malc import check_snow, pretify_data
-import mySQLdatabase as sql
+import SQLitedb as sql
 from flask import Flask, request
 from flask_cors import CORS
 from flask.json import jsonify
