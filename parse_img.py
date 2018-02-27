@@ -5,7 +5,7 @@ import cv2
 import calibrate
 import collections
 from resort_names import *
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 Params = collections.namedtuple('Params', ['a', 'b', 'c'])  # to store equation of a line
 NBR_OF_THRESHOLD = 10
@@ -50,10 +50,8 @@ def read_height(image, resort, debug_option=False):
         from matplotlib import pyplot as plt
 
     if resort == CYPRESS:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        dotenv_path = dir_path + "/.env"
-        load_dotenv(dotenv_path)
-        
+        load_dotenv(find_dotenv())
+
         if os.environ.get("TOP_LEFT_OFFSET") is None:  # calibration has not been done, calibration is done once in a lifetime
             calibrate.cypress_img(debug_option)
         # else no need to calibrate > already done

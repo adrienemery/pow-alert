@@ -86,7 +86,7 @@ def query_registered_numbers():
     number_list = []
 
     for num in c.execute("""SELECT number FROM Users WHERE registered="yes" """):
-        number_list.append(num)
+        number_list.append(num[0])  # Database return a tuple (num,)
 
     conn.close()
     return number_list
