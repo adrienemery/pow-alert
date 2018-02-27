@@ -97,9 +97,9 @@ if __name__ == "__main__":
     fresh_snow = False
     registered_numbers = sql.query_registered_numbers()
 
-    txt_message = ""
+    txt_message = "**Snow Report**"
     for resort in resort_dict.values():
-        txt_message = f"{txt_message} {resort.data['name'].title()}:\n" \
+        txt_message = f"{txt_message} \n{resort.data['name'].title()}:\n" \
                       f"{resort.data['12']}cm last 12h\n" \
                       f"{resort.data['24']}cm last 24h\n" \
                       "******************"
