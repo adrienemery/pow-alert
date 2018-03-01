@@ -25,20 +25,20 @@ def handler():
 
     sql.update_database(client_num, msg.lower())
 
-    if msg.lower() == "update":
+    if msg.lower().strip() == "update":
         update(client_num)
-    elif msg.lower() == "register":
+    elif msg.lower().strip() == "register":
         txt = f"You will now receive updates in the morning if it snows overnight " \
               f"on the Vancouver local mountains.\n" \
               f"You can stop it at any moment by sending 'unregister' to this number."
         notifications.send_sms(txt, client_num)
-    elif msg.lower() == "unregister":
+    elif msg.lower().strip() == "unregister":
         txt = f"You will stop receiving automatic updates. You can always reactivate the service by sending 'register'."
         notifications.send_sms(txt, client_num)
-    elif msg.lower() == "remove":
+    elif msg.lower().strip() == "remove":
         txt = f"Your phone number has been successfully removed from the database."
         notifications.send_sms(txt, client_num)
-    elif msg.lower() == "information":
+    elif msg.lower().strip() == "information":
         txt = f"Here are the keywords you can use:\n" \
                "'update': you will receive the current status on the mountain.\n\n" \
                "'register': you will be registered for morning text if fresh snow on the local mountain.\n\n" \
