@@ -32,6 +32,9 @@ class Resort:
                                                   debug_option=PLOT_DEBUG,
                                                   resort=self.name)
         page = requests.get(self.info_url)
+        with open(f"log/{self.name.title()}.html.log", "w") as html_log_file:
+            html_log_file.write(page.text)
+
         handler_fnc = getattr(self, f'update_{self.name}')
         return handler_fnc(page)
 
