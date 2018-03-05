@@ -116,8 +116,8 @@ if __name__ == "__main__":
         if resort['info'] != "":
             txt = f"{txt_message}SPECIAL NOTICE: {resort['info']}\n"
         txt = f"{txt_message}******************"
-        if resort.name == CYPRESS and int(resort._12hsnow) > 0:
-            io.imsave("test_Cypress.png", resort.webcam_img)
+        if resort.name == CYPRESS:
+            io.imsave(f"log/{resort.name.title()}.png", resort.webcam_img)
 
         if int(resort._12hsnow) > 0:
             fresh_snow = True
