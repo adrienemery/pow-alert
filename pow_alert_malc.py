@@ -23,6 +23,7 @@ class Resort:
         self.webcam_img = None
         self._24hsnow = "???"
         self._12hsnow = "???"
+        self.extra_info = ""
 
     def update(self):
         if self.webcam_url:
@@ -47,17 +48,22 @@ class Resort:
             if "24 hr Snow" in div.text:
                 el = div.find('span', class_='numbers')
                 self._24hsnow = el.text.split(' ')[0]
+        div = soup.find('div', class_='additional-info')
+        if div.text != "":
+            self.extra_info = div.text
+
 
     def display_info(self):
         print(f"{self.name.tittle()} report:")
         print(f"{self._12hsnow} cm overnight")
         print(f"{self._24hsnow} cm last 24h")
+        print(f"{Special resort info: self.extra_info} ")
         print("******************")
 
     @property
     def data(self):
         self.update()
-        return {'name':self.name, '12':self._12hsnow, '24':self._24hsnow}
+        return {'name':self.name, '12':self._12hsnow, '24':self._24hsnow, 'info':self.extra_info}
 
 
 resort_dict = {
@@ -83,8 +89,10 @@ def pretify_data(data):
     for resort in data:
         txt = f"{txt} \n{resort['name'].title()}:\n" \
               f"{resort['12']}cm last 12h\n" \
-              f"{resort['24']}cm last 24h\n" \
-              "******************"
+              f"{resort['24']}cm last 24h\n"
+        if resort['info'] != "":
+              txt = txt + f"SPECIAL NOTICE: {resort['info']}\n"
+        "******************"
     return txt
 
 

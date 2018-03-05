@@ -19,7 +19,7 @@ def update(to_num):
 
 @app.route('/')
 def handler():
-    msg = request.args['Body']
+    msg = request.args['Body'].lower().strip()
     client_num = request.args['From']
     # when using notifications.send_sms() method, remember that From and To args received are reversed when message sent
 
@@ -27,18 +27,18 @@ def handler():
 
     if msg.lower().strip() == "update":
         update(client_num)
-    elif msg.lower().strip() == "register":
+    elif msg == "register":
         txt = f"You will now receive updates in the morning if it snows overnight " \
               f"on the Vancouver local mountains.\n" \
               f"You can stop it at any moment by sending 'unregister' to this number."
         notifications.send_sms(txt, client_num)
-    elif msg.lower().strip() == "unregister":
+    elif msg == "unregister":
         txt = f"You will stop receiving automatic updates. You can always reactivate the service by sending 'register'."
         notifications.send_sms(txt, client_num)
-    elif msg.lower().strip() == "remove":
+    elif msg == "remove":
         txt = f"Your phone number has been successfully removed from the database."
         notifications.send_sms(txt, client_num)
-    elif msg.lower().strip() == "information":
+    elif msg == "information":
         txt = f"Here are the keywords you can use:\n" \
                "'update': you will receive the current status on the mountain.\n\n" \
                "'register': you will be registered for morning text if fresh snow on the local mountain.\n\n" \
