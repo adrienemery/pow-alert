@@ -10,6 +10,12 @@ import notifications
 import parse_img
 from resort_names import *
 import SQLitedb as sql
+import time
+
+day = time.strftime("%d")
+month = time.strftime("%m")
+year = time.strftime("%Y")
+date = f"{year}_{month}_{day}"
 
 resort_names = [CYPRESS, WHISTLER]
 PLOT_DEBUG = False
@@ -32,7 +38,7 @@ class Resort:
                                                   debug_option=PLOT_DEBUG,
                                                   resort=self.name)
         page = requests.get(self.info_url)
-        with open(f"log/{self.name.title()}.html.log", "w") as html_log_file:
+        with open(f"log/HTML/{date}_{self.name.title()}.html", "w") as html_log_file:
             html_log_file.write(page.text)
 
         handler_fnc = getattr(self, f'update_{self.name}')
@@ -117,7 +123,7 @@ if __name__ == "__main__":
             txt = f"{txt_message}SPECIAL NOTICE: {resort['info']}\n"
         txt = f"{txt_message}******************"
         if resort.name == CYPRESS:
-            io.imsave(f"log/{resort.name.title()}.png", resort.webcam_img)
+            io.imsave(f"log/CAM/{date}_{resort.name.title()}_cam.png", resort.webcam_img)
 
         if int(resort._12hsnow) > 0:
             fresh_snow = True
