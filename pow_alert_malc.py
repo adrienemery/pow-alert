@@ -91,8 +91,8 @@ def pretify_data(data):
               f"{resort['12']}cm last 12h\n" \
               f"{resort['24']}cm last 24h\n"
         if resort['info'] != "":
-              txt = txt + f"SPECIAL NOTICE: {resort['info']}\n"
-        "******************"
+            txt = f"{txt}SPECIAL NOTICE: {resort['info']}\n"
+    txt = f"{txt}******************"
     return txt
 
 
@@ -110,7 +110,9 @@ if __name__ == "__main__":
         txt_message = f"{txt_message} \n{resort.data['name'].title()}:\n" \
                       f"{resort.data['12']}cm last 12h\n" \
                       f"{resort.data['24']}cm last 24h\n" \
-                      "******************"
+        if resort['info'] != "":
+            txt = f"{txt_message}SPECIAL NOTICE: {resort['info']}\n"
+        txt = f"{txt_message}******************"
         if resort.name == CYPRESS and int(resort._12hsnow) > 0:
             io.imsave("test_Cypress.png", resort.webcam_img)
 
