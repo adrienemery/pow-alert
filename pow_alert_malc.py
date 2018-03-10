@@ -27,8 +27,8 @@ class Resort:
         self.webcam_url = cam_url
         self.info_url = info_url
         self.webcam_img = None
-        self._24hsnow = "???"
-        self._12hsnow = "???"
+        self._24hsnow = ""
+        self._12hsnow = ""
         self.extra_info = ""
 
     def update(self):
@@ -57,6 +57,7 @@ class Resort:
             if "24 hr Snow" in div.text:
                 el = div.find('span', class_='numbers')
                 self._24hsnow = el.text.split(' ')[0]
+                break
         div = soup.find('div', class_='additional-info')
         if div.text != "":
             self.extra_info = div.text
@@ -74,7 +75,7 @@ class Resort:
         print(f"{self.name.tittle()} report:")
         print(f"{self._12hsnow} cm overnight")
         print(f"{self._24hsnow} cm last 24h")
-        print(f"{Special resort info: self.extra_info} ")
+        print(f"Special resort info: {self.extra_info} ")
         print("******************")
 
     @property
@@ -107,12 +108,16 @@ def check_snow(resort_list_names=None):
 def pretify_data(data):
     txt = "**Snow Report**"
     for resort in data:
-        txt = f"{txt} \n{resort['name'].title()}:\n" \
-              f"{resort['12']}cm last 12h\n" \
-              f"{resort['24']}cm last 24h\n"
-        if resort['info'] != "":
-            txt = f"{txt}SPECIAL NOTICE: {resort['info']}\n"
-    txt = f"{txt}******************"
+        txt = f"{txt}\n{resort['name'].title()}:"
+
+        if resort['12']:
+            txt = f"{txt}\n{resort['12']}cm last 12h"
+        if resort['24']:
+            txt = f"{txt}\n{resort['24']}cm last 24h"
+        if resort['info']:
+            txt = f"{txt}\nSPECIAL NOTICE: {resort['info']}"
+
+    txt = f"{txt}\n******************"
     return txt
 
 
@@ -125,22 +130,33 @@ if __name__ == "__main__":
     fresh_snow = False
     registered_numbers = sql.query_registered_numbers()
 
-    txt_message = "**Snow Report**"
+    txt= "**Snow Report**"
     for resort in resort_dict.values():
-        txt_message = f"{txt_message} \n{resort.data['name'].title()}:\n" \
-                      f"{resort.data['12']}cm last 12h\n" \
-                      f"{resort.data['24']}cm last 24h\n" \
-        if resort['info'] != "":
-            txt = f"{txt_message}SPECIAL NOTICE: {resort['info']}\n"
-        txt = f"{txt_message}******************"
-        if resort.name == CYPRESS:
+        txt = f"{txt}\n{resort.data['name'].title()}:"
+
+        if resort.data['name'] == CYPRESS:
+            if resort.data['12'] == "Trace":
+                resort.data['12'] = 0;
+            if resort.data['24'] == "Trace":
+                resort.data['24'] = 0;
+
+        if resort.data['12']:
+            txt = f"{txt}\n{resort.data['12']}cm last 12h"
+        if resort.data['24']:
+            txt = f"{txt}\n{resort.data['24']}cm last 24h"
+        if resort.data['info']:
+            txt = f"{txt}\nSPECIAL NOTICE: {resort.data['info']}"
+
+        txt = f"{txt}\n******************"
+
+        if resort.webcam_img is not None:
             io.imsave(f"log/CAM/{date}_{resort.name.title()}_cam.png", resort.webcam_img)
 
-        if int(resort._12hsnow) > 0:
+        if resort._12hsnow and int(resort._12hsnow) > 0: # Mt Seymour doesnt have a 12h snow report
             fresh_snow = True
 
     if fresh_snow:
         for number in registered_numbers:
-            notifications.send_sms(txt_message, number)
+            notifications.send_sms(txt, number)
 
 

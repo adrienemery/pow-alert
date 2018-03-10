@@ -23,7 +23,7 @@ def handler():
     client_num = request.args['From']
     # when using notifications.send_sms() method, remember that From and To args received are reversed when message sent
 
-    sql.update_database(client_num, msg.lower())
+    sql.update_database(client_num, msg)
 
     if msg.lower().strip() == "update":
         update(client_num)
