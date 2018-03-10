@@ -61,6 +61,14 @@ class Resort:
         if div.text != "":
             self.extra_info = div.text
 
+    def update_seymour(self, page):
+        soup = BeautifulSoup(page.content, 'html.parser')
+        tds = soup.find_all('td')
+        for td in tds:
+            if "Last 24 hours" in td.text:
+                fall = td.text.split(' ')[3]
+                self._24hsnow = re.sub('[a-z]', '', fall)
+                break
 
     def display_info(self):
         print(f"{self.name.tittle()} report:")
@@ -81,7 +89,10 @@ resort_dict = {
                     info_url="http://www.cypressmountain.com/downhill-conditions/"),
 
     WHISTLER: Resort(name=WHISTLER,
-                     info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx")
+                     info_url="https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx"),
+
+    SEYMOUR: Resort(name=SEYMOUR,
+                    info_url="http://mtseymour.ca/conditions-hours-operation")
 }
 
 
