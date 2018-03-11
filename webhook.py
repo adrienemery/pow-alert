@@ -7,6 +7,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask.json import jsonify
 import notifications
+import json
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -56,6 +58,13 @@ def handler():
 def index():
     result = check_snow()
     return jsonify(result)
+
+@app.route('/github', methods=['POST'])
+def github_hook():
+    data = json.loads(request.data)
+    if data['events'] == 'pull_request':
+        os.system("git pull")
+        os.system("service pow-alert restart")
 
 
 if __name__ == "__main__":
