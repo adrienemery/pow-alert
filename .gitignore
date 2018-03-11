@@ -101,5 +101,9 @@ ENV/
 # mypy
 .mypy_cache/
 
-#Pycharm
+# Pycharm
 .idea/
+
+# Database
+*.db
+
